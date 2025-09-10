@@ -1,11 +1,12 @@
+import { LockIcon, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const Login = () => {
 
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ username: "", password: "" });
+    const [formData, setFormData] = useState({ email: "", password: "" });
 
     const handleChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -49,16 +50,36 @@ const Login = () => {
                 </h2>
                 <form className="space-y-6" onSubmit={handleSubmit} method='POST'>
                     <div>
-                        <label className="block text-sm font-medium text-white mb-1">
-                            Username <span className="text-red-400">*</span>
+                        <label className="block text-sm font-medium text-white mb-2">
+                            Email <span className="text-red-400">*</span>
                         </label>
-                        <input type="text" name='username' value={formData.username} onChange={handleChange} required className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter your username" />
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Enter your email"
+                                name='email'
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 pl-10 rounded-xl border border-white/30 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+                                required />
+                            <Mail className="absolute left-3 top-3.5 text-gray-300" size={20} />
+                        </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-white mb-1">
+                        <label className="block text-sm font-medium text-white mb-2">
                             Password <span className="text-red-400">*</span>
                         </label>
-                        <input type="password" name='password' value={formData.password} onChange={handleChange} required className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter your password" />
+                        <div className="relative">
+                            <input
+                                type="password"
+                                placeholder="Enter your password"
+                                name='password'
+                                value={formData.password}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 pl-10 rounded-lg border border-white/30 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+                                required />
+                            <LockIcon className="absolute left-3 top-4 text-gray-300" size={20} />
+                        </div>
                     </div>
                     <button type="submit" className="cursor-pointer w-full py-2 mt-6 px-4 bg-blue-800 hover:bg-blue-900 text-white font-semibold rounded-lg shadow-lg transition">
                         Login
@@ -66,9 +87,9 @@ const Login = () => {
                 </form>
                 <p className="text-center text-gray-300 mt-4 text-sm">
                     Forgot your password?{" "}
-                    <a href="#" className="text-blue-400 hover:underline">
+                    <Link to="/forget-password" className="text-blue-400 hover:underline">
                         Reset here
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>

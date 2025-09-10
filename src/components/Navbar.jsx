@@ -67,9 +67,15 @@ const Navbar = ({ onAideData }) => {
           }
         }
       );
-      const data = await response.json();
-      onAideData(data);
-      navigate("/");
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
+      } else {
+        const data = await response.json();
+        onAideData(data);
+        navigate("/");
+      }
+
     } catch (error) {
       console.log(error);
       onAideData({ status: false, output: "Error running AIDE check." });
@@ -90,15 +96,20 @@ const Navbar = ({ onAideData }) => {
           }
         }
       );
-      const data = await response.json();
-      if (data.success) {
-        await handleRunCheck();
-        toast.success(data.output, { autoClose: 2000 });
-        navigate("/");
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
       } else {
-        toast.error("Error occured while accepting changes", {
-          autoClose: 2000,
-        });
+        const data = await response.json();
+        if (data.success) {
+          await handleRunCheck();
+          toast.success(data.output, { autoClose: 2000 });
+          navigate("/");
+        } else {
+          toast.error("Error occured while accepting changes", {
+            autoClose: 2000,
+          });
+        }
       }
     } catch (err) {
       console.error("Error accepting changes:", err);
@@ -106,8 +117,7 @@ const Navbar = ({ onAideData }) => {
     setLoadingChanges(false);
   }
 
-  const handleLogout = (e) => {
-    e.preventDefault();
+  const handleLogout = () => {
     setAccessToken(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
