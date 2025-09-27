@@ -72,6 +72,7 @@ const Navbar = ({ onAideData }) => {
         window.location.href = "/login";
       } else {
         const data = await response.json();
+        console.log(data)
         onAideData(data);
         navigate("/");
       }
