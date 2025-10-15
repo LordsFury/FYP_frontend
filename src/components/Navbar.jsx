@@ -15,8 +15,8 @@ import {
 import { faMoon, faSun, faShieldAlt, faCheckCircle, faPlay, faSignInAlt, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { Loader2 } from "lucide-react";
 
-const Navbar = ({ onAideData }) => {
-  const [loadingRun, setLoadingRun] = useState(false);
+const Navbar = ({ loadingRun, runCheck, unreadCount, setUnreadCount, openAlerts }) => {
+
   const [loadingChanges, setLoadingChanges] = useState(false);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -48,41 +48,13 @@ const Navbar = ({ onAideData }) => {
   };
 
   const navItems = [
-    { name: "Dashboard", path: "/", icon: faChartBar },
+    { name: "Dashboard", path: "/dashboard", icon: faChartBar },
     { name: "Settings", path: "/settings", icon: faCog },
     { name: "Alerts", path: "/alerts", icon: faBell },
     { name: "History", path: "/history", icon: faHistory },
   ];
 
-  const handleRunCheck = async () => {
-    setLoadingRun(true);
-    const token = localStorage.getItem("accessToken");
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_HOST}/api/run-check/`,
-        {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          }
-        }
-      );
-      if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("accessToken");
-        window.location.href = "/login";
-      } else {
-        const data = await response.json();
-        console.log(data)
-        onAideData(data);
-        navigate("/");
-      }
 
-    } catch (error) {
-      console.log(error);
-      onAideData({ status: false, output: "Error running AIDE check." });
-    }
-    setLoadingRun(false);
-  };
 
   async function handleAcceptChanges() {
     setLoadingChanges(true);
@@ -99,18 +71,20 @@ const Navbar = ({ onAideData }) => {
       );
       if (response.status === 401 || response.status === 403) {
         localStorage.removeItem("accessToken");
-        window.location.href = "/login";
-      } else {
-        const data = await response.json();
-        if (data.success) {
-          await handleRunCheck();
-          toast.success(data.output, { autoClose: 2000 });
-          navigate("/");
-        } else {
-          toast.error("Error occured while accepting changes", {
-            autoClose: 2000,
-          });
+        if (location.pathname !== "/login") {
+          window.location.href = "/login";
         }
+        return;
+      }
+      const data = await response.json();
+      if (data.success) {
+        await runCheck();
+        toast.success(data.output, { autoClose: 2000 });
+        navigate("/dashboard");
+      } else {
+        toast.error("Error occured while accepting changes", {
+          autoClose: 2000,
+        });
       }
     } catch (err) {
       console.error("Error accepting changes:", err);
@@ -129,18 +103,29 @@ const Navbar = ({ onAideData }) => {
     <nav className="fixed top-0 w-full z-50 px-6 py-3 bg-gray-200 dark:bg-gray-900">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center gap-10">
-          <h1 className="text-gray-900 dark:text-white font-extrabold text-2xl tracking-wide flex items-center gap-1">
+          <Link to="/" className="text-gray-900 dark:text-white font-extrabold text-2xl tracking-wide flex items-center gap-1">
             <FontAwesomeIcon icon={faShieldAlt} className="text-blue-600 dark:text-blue-400" />
             AIDE
-          </h1>
+          </Link>
           {accessToken && (
             <div className="hidden lg:flex items-center lg:gap-4 xl:gap-10 gap-8 text-gray-700 dark:text-zinc-200 text-base">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={() => {
+                    if (item.name === "Alerts") {
+                      openAlerts();
+                      setUnreadCount(0);
+                    }
+                  }}
                   className="relative group font-medium text-lg hover:text-blue-700 dark:hover:text-blue-400 transition-transform duration-300 hover:scale-110">
                   {item.name}
+                  {item.name === "Alerts" && unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
                   <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-blue-600 dark:bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               ))}
@@ -174,7 +159,7 @@ const Navbar = ({ onAideData }) => {
                 )}
               </button>
               <button
-                onClick={handleRunCheck}
+                onClick={runCheck}
                 disabled={loadingRun || loadingChanges}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white shadow-md transition ${loadingRun
                   ? "bg-blue-600 cursor-wait"
@@ -241,7 +226,13 @@ const Navbar = ({ onAideData }) => {
             <Link
               key={item.path}
               to={item.path}
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                if (item.name === "Alerts") {
+                  openAlerts();
+                  setUnreadCount(0);
+                }
+              }}
               className="flex items-center gap-4 p-4 rounded-xl 
                bg-white/50 dark:bg-gray-800/80 
                shadow-sm hover:shadow-md 
@@ -255,8 +246,13 @@ const Navbar = ({ onAideData }) => {
                   className="text-blue-600 dark:text-blue-400 text-lg"
                 />
               </div>
-              <span className="text-gray-800 dark:text-gray-200 font-medium text-base">
+              <span className="text-gray-800 relative dark:text-gray-200 font-medium text-base">
                 {item.name}
+                {item.name === "Alerts" && unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-6 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
               </span>
             </Link>
           ))}
@@ -284,7 +280,7 @@ const Navbar = ({ onAideData }) => {
             </button>
             <button
               onClick={() => {
-                handleRunCheck();
+                runCheck();
                 setIsOpen(false);
               }}
               disabled={loadingRun}

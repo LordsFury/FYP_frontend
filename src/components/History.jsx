@@ -20,6 +20,7 @@ function History({ onDeleted }) {
   const [allData, setAllData] = useState([]);
   const [visibleCount, setVisibleCount] = useState(10);
   const [searchChange, setSearchChange] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dbInfo, setDbInfo] = useState([]);
   const [details, setDetails] = useState({
@@ -40,26 +41,26 @@ function History({ onDeleted }) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-
   const getAllData = async () => {
     const token = localStorage.getItem("accessToken");
     const response = await fetch(`${import.meta.env.VITE_API_HOST}/api/all-data/`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       }
     });
     if (response.status === 401 || response.status === 403) {
       localStorage.removeItem("accessToken");
-      window.location.href = "/login";
-    } else {
-      const data = await response.json();
-      if (data.success) {
-        setLoading(false);
-        setAllData(data.allData);
+      if (location.pathname !== "/login") {
+        window.location.href = "/login";
       }
+      return;
     }
-
+    const data = await response.json();
+    if (data.success) {
+      setLoading(false);
+      setAllData(data.allData);
+    }
   };
 
   useEffect(() => {
@@ -92,7 +93,7 @@ function History({ onDeleted }) {
         response = await fetch(`${import.meta.env.VITE_API_HOST}/api/delete-data/${scan_id}/`, {
           method: "DELETE",
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           }
         });
         onDeleted(scan_id);
@@ -111,30 +112,32 @@ function History({ onDeleted }) {
           response = await fetch(`${import.meta.env.VITE_API_HOST}/api/delete-all-data/`, {
             method: "DELETE",
             headers: {
-              "Authorization": `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             }
           });
           if (response.status === 401 || response.status === 403) {
             localStorage.removeItem("accessToken");
-            window.location.href = "/login";
-          } else {
-            const data = await response.json();
-            if (data.success) {
-              Swal.fire({
-                title: "History Cleared!",
-                text: data.output,
-                icon: "success",
-                confirmButtonColor: "#3085d6",
-              });
-              onDeleted(null);
-            } else {
-              Swal.fire({
-                title: "Error!",
-                text: data.output,
-                icon: "error",
-                confirmButtonColor: "#d33",
-              });
+            if (location.pathname !== "/login") {
+              window.location.href = "/login";
             }
+            return;
+          }
+          const data = await response.json();
+          if (data.success) {
+            Swal.fire({
+              title: "History Cleared!",
+              text: data.output,
+              icon: "success",
+              confirmButtonColor: "#3085d6",
+            });
+            onDeleted(null);
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: data.output,
+              icon: "error",
+              confirmButtonColor: "#d33",
+            });
           }
         }
       }
@@ -153,8 +156,9 @@ function History({ onDeleted }) {
     setVisibleCount(5);
   };
 
-  const handleView = async (e, scan_id) => {
+  const handleView = async (e, scan) => {
     e.preventDefault();
+    const scan_id = scan.id;
     const token = localStorage.getItem("accessToken");
     const response = await fetch(
       `${import.meta.env.VITE_API_HOST}/api/view-report/${scan_id}`,
@@ -167,27 +171,30 @@ function History({ onDeleted }) {
     );
     if (response.status === 401 || response.status === 403) {
       localStorage.removeItem("accessToken");
-      window.location.href = "/login";
-    } else {
-      const data = await response.json();
-      setSummary({
-        startTimestamp: data.data.summary["Start Timestamp"],
-        endTimestamp: data.data.summary["End Timestamp"],
-        totalFiles: data.data.summary["Total Files Scanned"],
-        filesAdded: data.data.summary["Files Added"],
-        filesRemoved: data.data.summary["Files Removed"],
-        filesChanged: data.data.summary["Files Changed"],
-      });
-      setDetails({
-        addedFiles: data.data.details["Added Files"] || [],
-        removedFiles: data.data.details["Removed Files"] || [],
-        changedFiles: data.data.details["Changed Files"] || [],
-        detailedInfo: data.data.details["Detailed Info"] || [],
-        dbAttributes: data.data.db_attributes || {},
-      });
-      setDbInfo(data.data.db_info || []);
-      setIsOpen(true);
+      if (location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      return;
     }
+    const data = await response.json();
+    setSummary({
+      startTimestamp: data.data.summary["Start Timestamp"],
+      endTimestamp: data.data.summary["End Timestamp"],
+      totalFiles: data.data.summary["Total Files Scanned"],
+      filesAdded: data.data.summary["Files Added"],
+      filesRemoved: data.data.summary["Files Removed"],
+      filesChanged: data.data.summary["Files Changed"],
+    });
+    setDetails({
+      addedFiles: data.data.details["Added Files"] || [],
+      removedFiles: data.data.details["Removed Files"] || [],
+      changedFiles: data.data.details["Changed Files"] || [],
+      detailedInfo: data.data.details["Detailed Info"] || [],
+      dbAttributes: data.data.db_attributes || {},
+    });
+    setDbInfo(data.data.db_info || []);
+    setIsOpen(true);
+    setSelectedItem(scan)
   }
 
   const handleDownload = async (e, scan_id) => {
@@ -204,7 +211,10 @@ function History({ onDeleted }) {
     );
     if (response.status === 401 || response.status === 403) {
       localStorage.removeItem("accessToken");
-      window.location.href = "/login";
+      if (location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      return;
     }
     if (!response.ok) {
       toast.error("Download failed", { autoClose: 2000 });
@@ -284,19 +294,33 @@ function History({ onDeleted }) {
                 <div key={index} className="text-black dark:text-white px-6 md:px-8 flex-1">
                   {item ? (
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-800 px-8 py-4">
+                      <h2 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400">
+                        {item.status === "success" ? "All Secure" : "Changes Found"}
+                      </h2>
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
                             Checked At:{" "}
-                            {new Date(item.run_time).toLocaleString("en-GB", {
-                              hour12: false,
-                            })}
+                            <span className="font-medium">
+                              {new Date(item.run_time).toLocaleString("en-GB", {
+                                hour12: false,
+                              })}
+                            </span>
                           </p>
-                          <p className="mt-1 text-sm">
-                            Changed: {item.files_changed} | Added:{" "}
-                            {item.files_added || 0} | Removed:{" "}
-                            {item.files_removed || 0}
+                          <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">
+                            {item.summary}
                           </p>
+                          <div className="flex flex-wrap gap-6 mt-2 text-sm">
+                            <span className="text-blue-600 dark:text-blue-400">
+                              Changed: <strong>{item.files_changed}</strong>
+                            </span>
+                            <span className="text-green-600 dark:text-green-400">
+                              Added: <strong>{item.files_added}</strong>
+                            </span>
+                            <span className="text-red-600 dark:text-red-400">
+                              Removed: <strong>{item.files_removed}</strong>
+                            </span>
+                          </div>
                           <ul className="mt-2 text-sm">
                             {item.recent_changes?.slice(0, 3).map((file, index) => (
                               <li key={index} className="border-b border-gray-700 py-1">
@@ -307,7 +331,7 @@ function History({ onDeleted }) {
                           </ul>
                           <div className="flex flex-wrap gap-4 mt-4">
                             <button
-                              onClick={(e) => handleView(e, item.id)}
+                              onClick={(e) => handleView(e, item)}
                               className="flex items-center gap-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg shadow-md transition transform hover:scale-105 duration-200 focus:outline-none">
                               <FileTextIcon className="w-5 h-5" />
                               <span className="font-medium">View Report</span>
@@ -320,7 +344,7 @@ function History({ onDeleted }) {
                             </button>
                           </div>
                           {isOpen && (
-                            <ViewModal summary={summary} details={details} dbInfo={dbInfo} scanData={item} onOpen={setIsOpen} />
+                            <ViewModal summary={summary} details={details} dbInfo={dbInfo} scanData={selectedItem} onOpen={setIsOpen} />
                           )}
                         </div>
                         <button onClick={(e) => { handleDelete(e, item.id) }}>

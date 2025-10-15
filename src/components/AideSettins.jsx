@@ -15,7 +15,6 @@ import {
 import { toast } from "react-toastify";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ArrowLeft } from "lucide-react";
 import useAuth from "../hooks/UseAuth";
 
 const AideSettins = () => {
@@ -46,7 +45,9 @@ const AideSettins = () => {
             );
             if (response.status === 401 || response.status === 403) {
                 localStorage.removeItem("accessToken");
-                window.location.href = "/login";
+                if (location.pathname !== "/login") {
+                    window.location.href = "/login";
+                }
                 return;
             }
             const data = await response.json();
@@ -110,15 +111,17 @@ const AideSettins = () => {
             );
             if (response.status === 401 || response.status === 403) {
                 localStorage.removeItem("accessToken");
-                window.location.href = "/login";
-            } else {
-                const data = await response.json();
-                if (data.success) {
-                    toast.success(data.msg, { autoClose: 2000 });
-                    setIsEditing(false);
-                } else {
-                    toast.error(data.msg, { autoClose: 2000 });
+                if (location.pathname !== "/login") {
+                    window.location.href = "/login";
                 }
+                return;
+            }
+            const data = await response.json();
+            if (data.success) {
+                toast.success(data.msg, { autoClose: 2000 });
+                setIsEditing(false);
+            } else {
+                toast.error(data.msg, { autoClose: 2000 });
             }
         } catch (error) {
             console.error(error);
@@ -129,10 +132,18 @@ const AideSettins = () => {
     };
 
     const fetchDirectories = async (path = "/") => {
-        const response = await fetch(`${import.meta.env.VITE_API_HOST}/api/browse/?path=${encodeURIComponent(path)}`);
+        const token = localStorage.getItem("accessToken");
+        const response = await fetch(`${import.meta.env.VITE_API_HOST}/api/browse/?path=${encodeURIComponent(path)}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         if (response.status === 401 || response.status === 403) {
             localStorage.removeItem("accessToken");
-            window.location.href = "/login";
+            if (location.pathname !== "/login") {
+                window.location.href = "/login";
+            }
             return;
         }
         const data = await response.json();
@@ -236,8 +247,8 @@ const AideSettins = () => {
                                                 }}
                                                 disabled={browsePath === "/"}
                                                 className={`flex items-center justify-center px-1 py-1 rounded-full ${browsePath === "/"
-                                                        ? "bg-gray-200 dark:bg-gray-700 text-gray-400 shadow-none"
-                                                        : "bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700 shadow-md"} transition`}>
+                                                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 shadow-none"
+                                                    : "bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700 shadow-md"} transition`}>
                                                 <ChevronLeft className="w-6 h-6" />
                                             </button>
 

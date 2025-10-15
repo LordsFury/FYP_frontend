@@ -30,7 +30,9 @@ const LoginSettings = () => {
                 );
                 if (response.status === 401 || response.status === 403) {
                     localStorage.removeItem("accessToken");
-                    window.location.href = "/login";
+                    if (location.pathname !== "/login") {
+                        window.location.href = "/login";
+                    }
                     return;
                 }
                 const data = await response.json();
@@ -76,25 +78,27 @@ const LoginSettings = () => {
             );
             if (response.status === 401 || response.status === 403) {
                 localStorage.removeItem("accessToken");
-                window.location.href = "/login";
-            } else {
-                const data = await response.json();
-                if (data.success) {
-                    toast.success(data.msg, { autoClose: 2000 });
-                    setIsEditingProfile(false);
-                    setCurrentPassword("");
-                    setNewPassword("");
-                    setConfirmPassword("");
-                    if (data.force_logout) {
-                        localStorage.removeItem("accessToken");
-                        localStorage.removeItem("refreshToken");
-                        setTimeout(() => {
-                            window.location.href = "/login";
-                        }, 2000);
-                    }
-                } else {
-                    toast.error(data.msg, { autoClose: 2000 });
+                if (location.pathname !== "/login") {
+                    window.location.href = "/login";
                 }
+                return;
+            }
+            const data = await response.json();
+            if (data.success) {
+                toast.success(data.msg, { autoClose: 2000 });
+                setIsEditingProfile(false);
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+                if (data.force_logout) {
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("refreshToken");
+                    setTimeout(() => {
+                        window.location.href = "/login";
+                    }, 2000);
+                }
+            } else {
+                toast.error(data.msg, { autoClose: 2000 });
             }
         } catch (error) {
             console.log(error);
