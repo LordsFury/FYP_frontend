@@ -61,7 +61,9 @@ function App() {
       );
       if (response.status === 401 || response.status === 403) {
         localStorage.removeItem("accessToken");
-        window.location.href = "/login";
+        if (location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
         return;
       }
       setUnreadCount(0);

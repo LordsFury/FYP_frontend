@@ -208,7 +208,9 @@ const Home = ({ runCheck, loadingRun }) => {
               {[
                 {
                   title: "Last Scan",
-                  value: overview.last_scan,
+                  value: overview.last_scan.toLocaleString("en-GB", {
+                    hour12: false,
+                  }),
                   color: "text-indigo-500",
                 },
                 {

@@ -54,8 +54,6 @@ const Navbar = ({ loadingRun, runCheck, unreadCount, setUnreadCount, openAlerts 
     { name: "History", path: "/history", icon: faHistory },
   ];
 
-
-
   async function handleAcceptChanges() {
     setLoadingChanges(true);
     const token = localStorage.getItem("accessToken");

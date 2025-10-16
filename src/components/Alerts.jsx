@@ -53,6 +53,7 @@ function Alerts() {
         return;
       }
       const data = await response.json();
+      console.log(data)
       setAlerts(data)
     } catch (error) {
       console.error(error);
