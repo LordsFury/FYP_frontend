@@ -47,7 +47,7 @@ function App() {
 
   useEffect(() => {
     fetchUnreadCount();
-  }, []);
+  }, [unreadCount]);
 
   const handleOpenAlerts = async () => {
     try {
