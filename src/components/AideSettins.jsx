@@ -154,7 +154,7 @@ const AideSettins = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-4 sm:p-6 md:p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-4 sm:p-6 md:p-6">
             <div className="flex flex-col items-start">
                 <div className="flex items-center gap-3 mb-6">
                     <FileText className="w-8 h-8 text-yellow-500" />
@@ -309,7 +309,7 @@ const AideSettins = () => {
                                 </>
                             ) : (
                                 <>
-                                    <Save className="w-4 h-4 sm:w-5 sm:h-5" /> Save
+                                    <Save className="w-4 h-4 sm:w-5 sm:h-5" /> Save Config
                                 </>
                             )}
                         </motion.button>

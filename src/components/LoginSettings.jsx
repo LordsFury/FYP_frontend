@@ -1,5 +1,5 @@
 "use client";
-import { Edit3, Loader2, User2Icon, X } from "lucide-react";
+import { Edit3, Loader2, Save, User2Icon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 // eslint-disable-next-line no-unused-vars
@@ -109,7 +109,7 @@ const LoginSettings = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-4 sm:p-6 md:p-8 mt-10">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-4 sm:p-6 md:p-6 mt-10">
             <div className="flex flex-col items-start">
                 <div className="flex items-center gap-3 mb-6">
                     <User2Icon className="w-8 h-8 text-indigo-500" />
@@ -146,7 +146,7 @@ const LoginSettings = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <Edit3 className="w-5 h-5" /> Save
+                                        <Save className="w-5 h-5" /> Update Profile
                                     </>
                                 )}
                             </motion.button>
