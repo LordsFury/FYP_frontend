@@ -77,6 +77,7 @@ function Dashboard({ aideData }) {
     const data = await response.json();
     if (data.success) {
       setLastScan(data);
+      console.log(data)
     }
     setLoading(false);
   }

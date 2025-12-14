@@ -44,7 +44,7 @@ const Login = () => {
                 <img src="/assets/images/login.jpg" alt="Login background" className="h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-black/40" />
             </div>
-            <div className="relative z-10 backdrop-blur-lg bg-white/10 border border-white/30 rounded-2xl shadow-2xl p-6 md:p-10 lg:p-10 xl:p-10 w-full max-w-md mx-6">
+            <div className="relative z-10 backdrop-blur-lg bg-white/10 border border-white/30 rounded-2xl shadow-2xl mt-0 lg:mt-10 p-6 md:p-10 lg:p-10 xl:p-10 w-full max-w-md mx-6">
                 <h2 className="lg:text-3xl text-2xl font-bold text-center text-white mb-6">
                     Admin Login
                 </h2>
